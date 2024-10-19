@@ -32,6 +32,15 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="App"
+        options={{
+          title: 'App',
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name={focused ? 'map' : 'map'} color={color} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }
