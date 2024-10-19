@@ -1,6 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { View, Text, StyleSheet, TextInput, Button, Alert, Async } from 'react-native';
-import localStorage from '@types'
+import { View, Text, StyleSheet, TextInput, Button, Alert } from 'react-native';
 import { AppContext } from '../contexts/AppContext';
 import { login } from '../api/api'; // Import the login function
 
@@ -16,7 +15,6 @@ const LoginScreen = ({ navigation }) => {
             const userData = await login(username, password);
             console.log(userData);
             setUser(userData.user);
-            localStorage.setItem('jwt', userData.jwt);
             navigation.navigate('Dashboard');
         } catch (error) {
             console.error('Login error:', error);
