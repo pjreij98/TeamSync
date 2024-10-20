@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Button, TextInput, Alert } from 'react-native';
-import { connect, disconnect } from '../api/socket';
+import { connect, disconnect } from '../../api/socket';
 import { useDispatch, useSelector } from 'react-redux';
-import { addTask, fetchTasks } from '../store/actions/taskActions';
+import { addTask, fetchTasks } from '../../store/actions/taskActions';
 import Modal from 'react-native-modal';
 
 const TaskBoard = () => {

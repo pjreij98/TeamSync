@@ -1,20 +1,20 @@
 import React, { useEffect, useContext } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import HomeScreen from '../../screens/HomeScreen';
-import Dashboard from '../../screens/Dashboard';
-import TaskBoard from '../../screens/TaskBoard';
-import LoginScreen from '../../screens/LoginScreen';
+import HomeScreen from '../screens/HomeScreen';
+import Dashboard from '../screens/Dashboard';
+import TaskBoard from '../screens/TaskBoard';
+import LoginScreen from '../screens/LoginScreen';
 import { AppProvider, AppContext } from '../../contexts/AppContext';
 import { connect, disconnect } from '../../api/socket';
 import { PaperProvider } from 'react-native-paper';
 import { Provider } from 'react-redux';
-import store from '../../store/store'
+import store from '../../store/store';
+import { NavigationContainer } from '@react-navigation/native';
 
 const Stack = createStackNavigator();
 
-export default function App() {
-    const { user } = useContext(AppContext);
+function AppNavigator() {
+    const { user } = useContext(AppContext); // Access the user from context
 
     useEffect(() => {
         if (user) {
@@ -29,22 +29,29 @@ export default function App() {
     }, [user]);
 
     return (
+        <NavigationContainer independent={true}>
+            <Stack.Navigator initialRouteName={user ? 'Home' : 'Login'}>
+                {user ? (
+                    <>
+                        <Stack.Screen name="HomeScreen" component={HomeScreen} />
+                        <Stack.Screen name="Dashboard" component={Dashboard} />
+                        <Stack.Screen name="TaskBoard" component={TaskBoard} />
+                    </>
+                ) : (
+                    <Stack.Screen name="Login" component={LoginScreen} />
+                )}
+            </Stack.Navigator>
+        </NavigationContainer>
+    );
+}
+
+export default function App() {
+    return (
         <Provider store={store}>
             <AppProvider>
                 <PaperProvider>
-                    <NavigationContainer independent={true}>
-                        <Stack.Navigator initialRouteName={user ? 'Home' : 'Login'}>
-                            {user ? (
-                                <>
-                                    <Stack.Screen name="Home" component={HomeScreen} />
-                                    <Stack.Screen name="Dashboard" component={Dashboard} />
-                                    <Stack.Screen name="TaskBoard" component={TaskBoard} />
-                                </>
-                            ) : (
-                                <Stack.Screen name="Login" component={LoginScreen} />
-                            )}
-                        </Stack.Navigator>
-                    </NavigationContainer>
+                    {/* NavigationContainer should be provided only once, possibly by Expo */}
+                    <AppNavigator />
                 </PaperProvider>
             </AppProvider>
         </Provider>

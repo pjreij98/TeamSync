@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { View, Text, StyleSheet, Button } from 'react-native';
-import { AppContext } from '../contexts/AppContext';
+import { AppContext } from '../../contexts/AppContext';
 
 const HomeScreen = ({ navigation }) => {
     const { user } = useContext(AppContext);

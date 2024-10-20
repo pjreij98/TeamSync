@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { View, Text, StyleSheet, TextInput, Button, Alert } from 'react-native';
-import { AppContext } from '../contexts/AppContext';
-import { login } from '../api/api'; // Import the login function
+import { AppContext } from '../../contexts/AppContext';
+import { login } from '../../api/api'; // Import the login function
 
 const LoginScreen = ({ navigation }) => {
     const { setUser } = useContext(AppContext);
@@ -13,7 +13,7 @@ const LoginScreen = ({ navigation }) => {
         setLoading(true);
         try {
             const userData = await login(username, password);
-            console.log(userData);
+            // console.log(userData);
             setUser(userData.user);
             navigation.navigate('Dashboard');
         } catch (error) {

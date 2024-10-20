@@ -13,7 +13,7 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts",
-    "screens/HomeScreen.js",
+    "app/screens/HomeScreen.js",
     "app/(tabs)/App.js"
   ]
 }
