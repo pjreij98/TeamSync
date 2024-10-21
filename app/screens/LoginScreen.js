@@ -2,6 +2,7 @@ import React, { useContext, useState } from 'react';
 import { View, Text, StyleSheet, TextInput, Button, Alert } from 'react-native';
 import { AppContext } from '../../contexts/AppContext';
 import { login } from '../../api/api'; // Import the login function
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LoginScreen = ({ navigation }) => {
     const { setUser } = useContext(AppContext);
@@ -13,9 +14,10 @@ const LoginScreen = ({ navigation }) => {
         setLoading(true);
         try {
             const userData = await login(username, password);
-            // console.log(userData);
-            setUser(userData.user);
-            navigation.navigate('Dashboard');
+            setUser(userData); // Store user data in context or state
+            console.log("THIS IS THE FUCKING USER DATA@!&*#NDSBAHUB!*@: " + JSON.stringify(userData));
+            await AsyncStorage.setItem('jwt', userData.jwt); // Store JWT token
+            navigation.navigate('Dashboard'); // Navigate to the dashboard screen
         } catch (error) {
             console.error('Login error:', error);
             Alert.alert('Login Failed', 'Invalid username or password.');

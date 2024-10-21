@@ -1,49 +1,122 @@
-// src/screens/TaskBoard.js
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Button, TextInput, Alert } from 'react-native';
-import { connect, disconnect } from '../../api/socket';
-import { useDispatch, useSelector } from 'react-redux';
-import { addTask, fetchTasks } from '../../store/actions/taskActions';
+import stompClient, { connect, disconnect } from '../../api/socket';
+import api from '../../api/api'
 import Modal from 'react-native-modal';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AppContext } from '@/contexts/AppContext';
 
 const TaskBoard = () => {
-    const tasks = useSelector((state) => state.taskState.tasks);
-    const dispatch = useDispatch();
-
+    const { user } = useContext(AppContext);
+    const [tasks, setTasks] = useState([]);
     const [isModalVisible, setModalVisible] = useState(false);
     const [newTaskTitle, setNewTaskTitle] = useState('');
 
+    // Fetch initial tasks from the backend when the component mounts
     useEffect(() => {
-        // Connect to WebSocket when component mounts
-        connect();
-
-        // Fetch initial tasks from backend
-        dispatch(fetchTasks());
-
-        // Disconnect from WebSocket when component unmounts
-        return () => {
-            disconnect();
+        const fetchTasks = async () => {
+            const token = await AsyncStorage.getItem('jwt');
+            console.log("JWT TOKEN : " + token);
+            try {
+                const response = await api.get('/tasks', { headers: {
+                    Authorization: token ? `Bearer ${token}` : ''
+                }}); // Replace with your backend API
+                setTasks(response.data);
+            } catch (error) {
+                console.error('Error fetching tasks:', error);
+            }
         };
-    }, [dispatch]);
 
+        fetchTasks();
+
+        // Connect to WebSocket
+        // connect();
+
+        // Handle WebSocket events (new tasks, updates, deletions)
+        // const handleTaskUpdates = (message) => {
+        //     const updatedTask = JSON.parse(message.body);
+        //     setTasks((prevTasks) =>
+        //         prevTasks.map((task) => (task.id === updatedTask.id ? updatedTask : task))
+        //     );
+        // };
+
+        // const handleNewTask = (message) => {
+        //     const newTask = JSON.parse(message.body);
+        //     setTasks((prevTasks) => [...prevTasks, newTask]);
+        // };
+
+        // const handleTaskDeletion = (message) => {
+        //     const taskId = JSON.parse(message.body);
+        //     setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
+        // };
+
+        // Subscribe to the relevant WebSocket topics
+        // const subscriptions = [
+        //     stompClient.subscribe('/topic/task-updates', handleTaskUpdates),
+        //     stompClient.subscribe('/topic/new-task', handleNewTask),
+        //     stompClient.subscribe('/topic/task-deleted', handleTaskDeletion),
+        // ];
+
+        // Cleanup WebSocket subscriptions when the component unmounts
+        // return () => {
+        //     subscriptions.forEach((subscription) => subscription.unsubscribe());
+        //     disconnect();
+        // };
+    }, []);
+
+    // Handle adding new task
+    const handleAddTask = async () => {
+        if (!newTaskTitle.trim()) {
+            Alert.alert('Validation Error', 'Task title cannot be empty.');
+            return;
+        }
+
+        try {
+            // console.log(user)
+            const deadline = new Date("2025-02-15T23:59:59").toISOString();
+            // await fetch("http://192.168.1.78:8080/api/tasks", {
+            //     body: JSON.stringify({ 
+            //         title: newTaskTitle, 
+            //         description: 'SAMPLE desc',
+            //         status: 'PENDING', 
+            //         priority: "MEDIUM",
+            //         deadline
+            //     }),
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //         Authorization: `Bearer ${user.jwt}` 
+            //     }
+            // })
+            const task = {
+                title: newTaskTitle, 
+                status: 'PENDING', 
+                description: 'SAMPLE desc',
+                priority: "MEDIUM",
+                deadline: "2025-02-15T23:59:59"
+            }
+            console.log(task)
+            await api.post('/tasks', task, {
+                headers: {
+                    Authorization: `Bearer ${user.jwt}` 
+                }
+            });
+            setNewTaskTitle('');
+            setModalVisible(false);
+            // New task will be received via WebSocket event
+        } catch (error) {
+            console.error('Error adding task:', error);
+            Alert.alert('Error', 'Failed to add task.', error);
+        }
+    };
+
+    // Render each task
     const renderItem = ({ item }) => (
         <TouchableOpacity style={styles.taskItem}>
             <Text style={styles.taskTitle}>{item.title}</Text>
             <Text>Status: {item.status}</Text>
         </TouchableOpacity>
     );
-
-    const handleAddTask = () => {
-        if (!newTaskTitle.trim()) {
-            Alert.alert('Validation Error', 'Task title cannot be empty.');
-            return;
-        }
-
-        dispatch(addTask({ title: newTaskTitle, status: 'PENDING' }));
-        setNewTaskTitle('');
-        setModalVisible(false);
-    };
 
     return (
         <View style={styles.container}>

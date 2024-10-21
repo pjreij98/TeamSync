@@ -17,15 +17,15 @@ function AppNavigator() {
     const { user } = useContext(AppContext); // Access the user from context
 
     useEffect(() => {
-        if (user) {
-            connect();
-        } else {
-            disconnect();
-        }
+        // if (user) {
+        //     connect();
+        // } else {
+        //     disconnect();
+        // }
 
-        return () => {
-            disconnect();
-        };
+        // return () => {
+        //     disconnect();
+        // };
     }, [user]);
 
     return (

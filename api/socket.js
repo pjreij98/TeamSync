@@ -2,10 +2,9 @@
 
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
-import store from '../store/store'; // Import the Redux store
-import { addTask, updateTask, removeTask } from '../store/actions/taskActions'; // Import action creators
+import api from './api';
 
-const SOCKET_URL = 'http://localhost:8080/ws'; // Replace with your backend WebSocket URL
+const SOCKET_URL = 'http://192.168.1.78:8080/ws'; // Replace with your backend WebSocket URL
 
 const stompClient = new Client({
     brokerURL: null, // Disable brokerURL since we're using a custom webSocketFactory
@@ -21,21 +20,23 @@ const stompClient = new Client({
         stompClient.subscribe('/topic/task-updates', (message) => {
             const task = JSON.parse(message.body);
             console.log('Task update received:', task);
-            store.dispatch(updateTask(task));
+            // api.post()
+            // store.dispatch(updateTask(task));
+
         });
 
         // Subscribe to New Tasks
         stompClient.subscribe('/topic/new-task', (message) => {
             const task = JSON.parse(message.body);
             console.log('New task received:', task);
-            store.dispatch(addTask(task));
+            // store.dispatch(addTask(task));
         });
 
         // Subscribe to Task Deletions
         stompClient.subscribe('/topic/task-deleted', (message) => {
             const taskId = JSON.parse(message.body);
             console.log('Task deleted:', taskId);
-            store.dispatch(removeTask(taskId));
+            // store.dispatch(removeTask(taskId));
         });
     },
     onStompError: (frame) => {

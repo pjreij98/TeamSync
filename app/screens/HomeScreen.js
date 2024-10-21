@@ -7,7 +7,7 @@ const HomeScreen = ({ navigation }) => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Welcome, {user.username}!</Text>
+            <Text style={styles.title}>Welcome, {user.user.username}!</Text>
             <Button
                 title="Go to Dashboard"
                 onPress={() => navigation.navigate('Dashboard')}
