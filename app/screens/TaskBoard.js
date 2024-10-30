@@ -7,26 +7,23 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppContext } from '@/contexts/AppContext';
 
 const TaskBoard = () => {
-    const { user } = useContext(AppContext);
+    const { user, jwt } = useContext(AppContext);
     const [tasks, setTasks] = useState([]);
     const [isModalVisible, setModalVisible] = useState(false);
     const [newTaskTitle, setNewTaskTitle] = useState('');
 
+    const fetchTasks = async () => {
+        try {
+            const response = await api.get('/tasks', { headers: {
+                Authorization: token ? `Bearer ${jwt}` : ''
+            }}); // Replace with your backend API
+            setTasks(response.data);
+        } catch (error) {
+            console.error('Error fetching tasks:', error);
+        }
+    };
     // Fetch initial tasks from the backend when the component mounts
     useEffect(() => {
-        const fetchTasks = async () => {
-            const token = await AsyncStorage.getItem('jwt');
-            console.log("JWT TOKEN : " + token);
-            try {
-                const response = await api.get('/tasks', { headers: {
-                    Authorization: token ? `Bearer ${token}` : ''
-                }}); // Replace with your backend API
-                setTasks(response.data);
-            } catch (error) {
-                console.error('Error fetching tasks:', error);
-            }
-        };
-
         fetchTasks();
 
         // Connect to WebSocket
@@ -85,7 +82,7 @@ const TaskBoard = () => {
             //     method: 'POST',
             //     headers: {
             //         'Content-Type': 'application/json',
-            //         Authorization: `Bearer ${user.jwt}` 
+            //         Authorization: `Bearer ${jwt}` 
             //     }
             // })
             const task = {
@@ -98,7 +95,7 @@ const TaskBoard = () => {
             console.log(task)
             await api.post('/tasks', task, {
                 headers: {
-                    Authorization: `Bearer ${user.jwt}` 
+                    Authorization: `Bearer ${jwt}` 
                 }
             });
             setNewTaskTitle('');
@@ -108,6 +105,7 @@ const TaskBoard = () => {
             console.error('Error adding task:', error);
             Alert.alert('Error', 'Failed to add task.', error);
         }
+        fetchTasks();
     };
 
     // Render each task

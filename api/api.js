@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: `http://192.168.1.78:8080/api`,
+    baseURL: `https://darling-treefrog-settled.ngrok-free.app/api`,
     headers: {
         'Content-Type': 'application/json',
         

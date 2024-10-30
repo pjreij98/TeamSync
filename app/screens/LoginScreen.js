@@ -1,3 +1,4 @@
+// src/screens/LoginScreen.js
 import React, { useContext, useState } from 'react';
 import { View, Text, StyleSheet, TextInput, Button, Alert } from 'react-native';
 import { AppContext } from '../../contexts/AppContext';
@@ -5,7 +6,7 @@ import { login } from '../../api/api'; // Import the login function
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LoginScreen = ({ navigation }) => {
-    const { setUser } = useContext(AppContext);
+    const { setUser, fetchProjectsForUser, setJwt } = useContext(AppContext); // Add fetchProjectsForUser from context
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
@@ -14,10 +15,15 @@ const LoginScreen = ({ navigation }) => {
         setLoading(true);
         try {
             const userData = await login(username, password);
-            setUser(userData); // Store user data in context or state
-            console.log("THIS IS THE FUCKING USER DATA@!&*#NDSBAHUB!*@: " + JSON.stringify(userData));
-            await AsyncStorage.setItem('jwt', userData.jwt); // Store JWT token
-            navigation.navigate('Dashboard'); // Navigate to the dashboard screen
+            setUser(userData.user); // Set user in AppContext
+            setJwt(userData.jwt);   // Set JWT in AppContext
+            await AsyncStorage.setItem('user', JSON.stringify(userData.user)); // Persist user in AsyncStorage
+            await AsyncStorage.setItem('jwt', userData.jwt); // Persist JWT token
+    
+            // Fetch the projects after login, passing the JWT and user directly
+            await fetchProjectsForUser(userData.jwt, userData.user);
+    
+            navigation.replace('SelectProject');
         } catch (error) {
             console.error('Login error:', error);
             Alert.alert('Login Failed', 'Invalid username or password.');
@@ -25,6 +31,7 @@ const LoginScreen = ({ navigation }) => {
             setLoading(false);
         }
     };
+    
 
     return (
         <View style={styles.container}>
@@ -47,6 +54,8 @@ const LoginScreen = ({ navigation }) => {
         </View>
     );
 };
+
+
 
 const styles = StyleSheet.create({
     container: {
